@@ -7,32 +7,59 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.navArgument
+import androidx.navigation.compose.rememberNavController
 import com.example.jetpackcomposepokedex.ui.theme.JetpackComposePokedexTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             JetpackComposePokedexTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(color = MaterialTheme.colors.background) {
-                    Greeting("Android")
+                // navigate which screen will be shown
+                val navController = rememberNavController()
+                NavHost(
+                    navController = navController,
+                    startDestination = "pokemon_list_screen"
+                ) {
+                    // main screen
+                    composable("pokemon_list_screen") {
+
+                    }
+                    // detail info screen
+                    composable(
+                        "pokemon_detail_screen/{dominantColor}/{pokemonName}",
+                        // similar to URL, pass dominantColor and pokemonName as parameter
+                        arguments = listOf(
+                            //extract args from route pass
+                            navArgument("dominantColor") {
+                                type = NavType.IntType
+                            },
+                            navArgument("pokemonName") {
+                                type = NavType.StringType
+                            }
+                        )
+                    ) {
+                        val dominantColor = remember {
+                            val color = it.arguments?.getInt("dominantColor")
+                            // use White color as default if color == null
+                            color?.let { Color(it) } ?: Color.White
+                        }
+                        val pokemonName = remember {
+                            it.arguments?.getString("pokemonName")
+                        }
+
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    JetpackComposePokedexTheme {
-        Greeting("Android")
     }
 }
